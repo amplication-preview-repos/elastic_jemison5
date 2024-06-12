@@ -1,0 +1,208 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DB_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Store {
+  businessDescription String?
+  businessName        String?
+  businessPhoneNumber String?
+  businessSector      String?
+  country             String?
+  createdAt           DateTime      @default(now())
+  currency            String?
+  customers           Customer[]
+  discounts           Discount[]
+  employees           Employee[]
+  id                  String        @id @default(cuid())
+  logoUrl             String?
+  orders              Order[]
+  paymentTypes        PaymentType[]
+  primaryAddress      String?
+  products            Product[]
+  state               String?
+  updatedAt           DateTime      @updatedAt
+}
+
+model Customer {
+  address   String?
+  createdAt DateTime @default(now())
+  email     String?
+  fullname  String?
+  id        String   @id @default(cuid())
+  orders    Order[]
+  phone     String?
+  store     Store?   @relation(fields: [storeId], references: [id])
+  storeId   String?
+  updatedAt DateTime @updatedAt
+}
+
+model Order {
+  createdAt     DateTime                @default(now())
+  customer      Customer?               @relation(fields: [customerId], references: [id])
+  customerId    String?
+  discount      Discount?               @relation(fields: [discountId], references: [id])
+  discountId    String?
+  employee      Employee?               @relation(fields: [employeeId], references: [id])
+  employeeId    String?
+  id            String                  @id @default(cuid())
+  note          String?
+  paymentStatus EnumOrderPaymentStatus?
+  paymentType   String?
+  products      Json?
+  salesChannel  String?
+  store         Store?                  @relation(fields: [storeId], references: [id])
+  storeId       String?
+  tax           Float?
+  updatedAt     DateTime                @updatedAt
+}
+
+model Role {
+  createdAt   DateTime   @default(now())
+  employees   Employee[]
+  id          String     @id @default(cuid())
+  name        String?
+  permissions Json?
+  updatedAt   DateTime   @updatedAt
+}
+
+model CreditLog {
+  createdAt DateTime @default(now())
+  id        String   @id @default(cuid())
+  updatedAt DateTime @updatedAt
+}
+
+model PaymentType {
+  createdAt DateTime @default(now())
+  id        String   @id @default(cuid())
+  name      String?
+  store     Store?   @relation(fields: [storeId], references: [id])
+  storeId   String?
+  updatedAt DateTime @updatedAt
+}
+
+model Discount {
+  createdAt         DateTime               @default(now())
+  id                String                 @id @default(cuid())
+  maxDiscountAmount Float?
+  name              String?
+  orders            Order[]
+  store             Store?                 @relation(fields: [storeId], references: [id])
+  storeId           String?
+  typeField         EnumDiscountTypeField?
+  updatedAt         DateTime               @updatedAt
+  validFrom         DateTime?
+  validTo           DateTime?
+  value             Float?
+}
+
+model Employee {
+  createdAt DateTime @default(now())
+  email     String?
+  fullname  String?
+  id        String   @id @default(cuid())
+  orders    Order[]
+  passcode  String?
+  phone     String?
+  role      Role?    @relation(fields: [roleId], references: [id])
+  roleId    String?
+  store     Store?   @relation(fields: [storeId], references: [id])
+  storeId   String?
+  updatedAt DateTime @updatedAt
+}
+
+model Tax {
+  createdAt     DateTime @default(now())
+  id            String   @id @default(cuid())
+  isCompoundTax Boolean?
+  name          String?
+  taxPercentage Float?
+  updatedAt     DateTime @updatedAt
+}
+
+model Product {
+  barcode          String?
+  category         Category? @relation(fields: [categoryId], references: [id])
+  categoryId       String?
+  createdAt        DateTime  @default(now())
+  id               String    @id @default(cuid())
+  images           Json?
+  isPublished      Boolean?
+  lowQuantityStock Int?
+  name             String?
+  price            Float?
+  quantity         Int?
+  store            Store?    @relation(fields: [storeId], references: [id])
+  storeId          String?
+  trackStock       Boolean?
+  unit             String?
+  updatedAt        DateTime  @updatedAt
+  variants         Json?
+}
+
+model Category {
+  createdAt DateTime  @default(now())
+  id        String    @id @default(cuid())
+  name      String?
+  products  Product[]
+  updatedAt DateTime  @updatedAt
+}
+
+model Subscription {
+  createdAt    DateTime @default(now())
+  currency     String?
+  id           String   @id @default(cuid())
+  maxEmployees Int?
+  maxSales     Int?
+  maxStores    Int?
+  name         String?
+  price        Float?
+  updatedAt    DateTime @updatedAt
+}
+
+model User {
+  country   String?
+  createdAt DateTime @default(now())
+  email     String?  @unique
+  firstName String?
+  fullname  String?
+  id        String   @id @default(cuid())
+  lastName  String?
+  password  String
+  roles     Json
+  updatedAt DateTime @updatedAt
+  username  String   @unique
+}
+
+model Variant {
+  barcode          String?
+  cost             Float?
+  createdAt        DateTime @default(now())
+  id               String   @id @default(cuid())
+  lowQuantityStock Int?
+  options          Json?
+  price            Float?
+  quantity         Int?
+  updatedAt        DateTime @updatedAt
+}
+
+model Option {
+  color     String?
+  createdAt DateTime @default(now())
+  id        String   @id @default(cuid())
+  size      String?
+  updatedAt DateTime @updatedAt
+  weight    String?
+}
+
+enum EnumOrderPaymentStatus {
+  Option1
+}
+
+enum EnumDiscountTypeField {
+  Option1
+}
